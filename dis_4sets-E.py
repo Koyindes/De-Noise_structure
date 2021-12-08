@@ -26,18 +26,69 @@ def draw():
         all_custom_lines[s] = Line2D([0], [0], color=colors[s], lw = 2)
     all_custom_lines["empty"] = Line2D([0], [0], lw = 0)
         
-    fig = plt.figure(figsize=(12, 12), constrained_layout=True)
+    fig = plt.figure(figsize=(16, 12), constrained_layout=True)
     # gs = fig.add_gridspec(nrows=10, ncols=5, hspace=0.5)
-    gs = fig.add_gridspec(nrows=4, ncols=4, hspace=0.05, wspace=0.05)
+    gs = fig.add_gridspec(nrows=3, ncols=4, hspace=0.05, wspace=0.05)
     
-    count = 0
-    for i in range(len(sets)):
-        tups = list(combinations(sets, i+1))
-        for j, tup in enumerate(tups):
-            lx = count % 4
-            ly = int(count / 4)
+    ax = fig.add_subplot(gs[0, 0])
+    
+    data = {}
+    custom_lines = []
+    custom_word = []
+    
+    for s in sets:
+        mps = mp_gap['E'].keys()
+        
+        another = mp_gap[s].keys()
+        mps = [x for x in mps if x in another]
+                
+        gap = [mp_gap[s][mp]-mp_gap['E'][mp] for mp in mps]
+        mean = np.mean(gap)
+        var = np.var(gap)
+        data[mean] = [s, mean, np.sqrt(var)]
+        
+        sns.distplot(gap, ax=ax, hist=False, kde=True, kde_kws={"color": colors[s]})
             
-            ax = fig.add_subplot(gs[lx, ly])
+    data = sorted(data.items(), key=lambda x:x[0])
+    
+    intsec_str = r'on '
+    for key, value in data:
+        custom_lines.append(all_custom_lines[value[0]])
+        custom_word.append(f'Error({value[0]}, E) ({round(value[1], 2)}, {round(value[2], 2)})')
+        intsec_str += '$\mathrm{' + value[0] + ' \cap E}$, '
+    
+    custom_lines.append(all_custom_lines['empty'])
+    custom_word.append(intsec_str)
+   
+    ax.set_xlim((-5, 5))
+    ax.set_ylim((0, 2.0))
+    ax.get_yaxis().set_visible(False)
+    ax.get_xaxis().set_visible(False)
+    
+    ax.get_yaxis().set_visible(True)
+    ax.get_yaxis().set_ticks(np.arange(0, 2.1, 0.4))
+    ax.set_ylabel('')
+    
+    ax.legend(custom_lines, custom_word)
+    ax.tick_params(labelsize=13)
+        
+    for i in range(1, len(sets)):
+        tups = list(combinations(sets, i+1))
+        
+        count = 0
+        if i == 1:
+            lx = 0
+            ly = 2
+        elif i == 2:
+            lx = 2
+            ly = 0
+        else:
+            lx = 0
+            ly = 1
+            
+        for j, tup in enumerate(tups):
+            print(lx + int((ly + count)/4), (ly + count)%4)            
+            ax = fig.add_subplot(gs[lx + int((ly + count)/4), (ly + count)%4])
             
             mps = mp_gap['E'].keys()
             for s in tup:
@@ -70,18 +121,18 @@ def draw():
             ax.get_yaxis().set_visible(False)
             ax.get_xaxis().set_visible(False)
             
-            if ly == 0:
+            if (ly + count)%4 == 0:
                 ax.get_yaxis().set_visible(True)
                 ax.get_yaxis().set_ticks(np.arange(0, 2.1, 0.4))
-                if lx == 2:
-                    ax.set_ylabel('Kernel Density Estimate')
+                if lx + int((ly + count)/4) == 1:
+                    ax.set_ylabel('Gaussian Kernel Density')
                 else:
                     ax.set_ylabel('')
                 
-            if lx == 3:
+            if lx == 2:
                 ax.get_xaxis().set_visible(True)
                 ax.get_xaxis().set_ticks(np.arange(-4, 5, 2))
-                if ly == 2:
+                if (ly + count)%4 == 2:
                     ax.set_xlabel('Band Gap, eV')
                     
             custom_lines.append(all_custom_lines['empty'])
