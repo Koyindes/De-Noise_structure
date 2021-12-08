@@ -188,14 +188,16 @@ def main():
     
     filenames1 = ["02923e5_1_123.log", "02923e5_0_123.log"]
     filenames2 = ["cd43447_0_123.log", "cd43447_1_123.log"]
+    filenames3 = ["ff14c38_0_123.log", "ff14c38_1_123.log"]
+    filenames4 = ["ff4e437_0_123.log", "ff4e437_1_123.log"]
     data_path = '../data/log/'
     
     color = {'P':'Crimson', 'E':'Orange', 'G':'Violet', 'S':'RoyalBlue', 'H':'PaleGreen'}
     
     count = 0
     s = 0
-    lines1 = get_lines(data_path + filenames2[0])
-    lines2 = get_lines(data_path + filenames2[1])
+    lines1 = get_lines(data_path + filenames4[0])
+    lines2 = get_lines(data_path + filenames4[1])
     
     root = new_tree()
     root = set_leaves_aver(root, '', 1, lines1, lines2, color)
@@ -213,7 +215,7 @@ def main():
     ts.show_scale = False
     
     root.show(tree_style = ts)
-    root.render(filenames2[0][:7]+'_merge_onion.pdf', w=width*200, h=160, units='mm',tree_style=ts)
+    root.render(filenames4[0][:7]+'_merge_onion.pdf', w=width*200, h=160, units='mm',tree_style=ts)
     # root.render(log_name[:7]+'_onion_color_r.pdf', w=width*200, h=width*200, units='mm',tree_style=ts)
         
 '''    

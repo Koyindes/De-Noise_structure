@@ -61,10 +61,26 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     ellipse.set_transform(transf + ax.transData)
     return ax.add_patch(ellipse)
 
-def plt_scatter(pca_data, ax2, i, x, y, label_name):
+def cal(c1, c2):
+    x = int(c1, 16)
+    y = int(c2, 16)
+    res = hex(int((x * 0.6 + y) / 1.6))
+    if len(res) == 4:
+        return res[2:4]
+    else:
+        return '0'+res[-1]
+        
+def get_color(c1, c2):
+    return '#' + cal(c1[1:3], c2[1:3]) + cal(c1[3:5], c2[3:5]) + cal(c1[5:7], c2[5:7])
+    
+def plt_scatter(pca_data, ax2, x, y, label_name):
     global colors
+    col = colors[label_name[0]]
+    for s in range(1, len(label_name)):
+        col = get_color(col, colors[label_name[s]])
     if len(pca_data) != 0:
-        ax2.scatter([n[x] for n in pca_data], [n[y] for n in pca_data], cmap='YlGnBu', marker='.', c=colors[i], s=3, label=label_name)
+        print(label_name, col)
+        ax2.scatter([n[x] for n in pca_data], [n[y] for n in pca_data], cmap='YlGnBu', marker='.', c=col, s=3, label=label_name)
 
 def single_set_distribution(df_name, pca_total, sort_total, x, y):
     global colors
@@ -103,15 +119,11 @@ def single_set_distribution(df_name, pca_total, sort_total, x, y):
         ax2.set_ylim(-0.02, 1.02)
         ax2.get_xaxis().set_visible(False)
         ax2.get_yaxis().set_visible(False)
-        i = 0
+        
         for key, value in sort_total:
             if key in df_name[0]:
-                plt_scatter(pca_total[key], ax2, i, x, y, key)
-                i += 1
-        '''
-        for i, name in enumerate(df_name[0]):
-            plt_scatter(pca_total[name], ax2, i, x, y, name)
-        '''
+                plt_scatter(pca_total[key], ax2, x, y, key)
+                
         ax2.legend(bbox_to_anchor =(0.5, 1.01), loc=8, ncol = 6, columnspacing=0.5, markerscale=8)
         fig.add_subplot(ax2)
         
@@ -137,14 +149,13 @@ def single_set_distribution(df_name, pca_total, sort_total, x, y):
         ax2.set_ylim(-0.02, 1.02)
         ax2.get_xaxis().set_visible(False)
         ax2.get_yaxis().set_visible(False)
-        c = 0
+        
         for key, value in sort_total:
             if key in df_name[0]:
                 ellipse_x = np.array([i[x] for i in pca_total[key]])
                 ellipse_y = np.array([i[y] for i in pca_total[key]])
                 confidence_ellipse(ellipse_x, ellipse_y, ax2, n_std=sigma, 
-                        alpha=0.1, label=key, facecolor=colors[c], zorder=0)
-                c += 1
+                        alpha=0.1, label=key, facecolor=colors[key], zorder=0)
         '''
         for j, name in enumerate(df_name[0]):
             ellipse_x = np.array([i[x] for i in pca_total[name]])
@@ -193,24 +204,11 @@ def pca_plot(df_name, pca_total, sort_total, x, y):
         ax2.set_ylim(-0.02, 1.02)
         ax2.get_xaxis().set_visible(False)
         ax2.get_yaxis().set_visible(False)
-        c = 0
+        
         for key, value in sort_total:
             if key in df_name_list:
-                if key == 'E':
-                    plt_scatter(pca_total[key], ax2, 1, x, y, key)
-                else:
-                    plt_scatter(pca_total[key], ax2, c, x, y, key)
-                    c += 1
-                    if c == 1:
-                        c += 1
-                    
-        '''
-        for i, name in enumerate(df_name_list):
-            if name == 'PSHG':
-                plt_scatter(pca_total[name], ax2, 3, x, y, name)
-            else:
-                plt_scatter(pca_total[name], ax2, i, x, y, name)
-        '''
+                plt_scatter(pca_total[key], ax2, x, y, key)
+                
         if index == 1:
             ax2.legend(bbox_to_anchor =(0.44, 1.01), loc=8, ncol = 6, columnspacing=0.45, handletextpad=0.2, markerscale=8)
         else:
@@ -221,17 +219,17 @@ def pca_plot(df_name, pca_total, sort_total, x, y):
     fig.savefig("plot_pca({0},{1}).pdf".format(x, y))
 
 df_name = [['E', 'P', 'S', 'H', 'G'], ['E', 'PS', 'PH', 'PG', 'SH', 'SG', 'HG'], ['E', 'PSH', 'PSG', 'PHG', 'SHG'], ['E', 'PSHG']]
-colors = ['green', 'm', 'orange', 'red', 'blue', 'darkcyan', 'black']
+# colors = ['green', 'm', 'orange', 'red', 'blue', 'darkcyan', 'black']
+# P: green H:orange S:blue G:red E:m
+colors = {'P':'#008000', 'E':'#bf00bf', 'H':'#ffa500', 'G':'#ff0000', 'S':'#0000ff'}
 
 pca_each = {}
 with open('../data/pca.json', encoding='utf-8') as f:
     pca_each = json.load(f)
     f.close()
 
-for key, value in pca_each.items():
-    print(key, len(value))
-'''
 sort_items = sorted(pca_each.items(), key=lambda x: len(x[1]), reverse=True)
+
 for key, value in sort_items:
     print(key, len(value))
 
@@ -241,4 +239,4 @@ for i in range(3):
         single_set_distribution(df_name, pca_each, sort_items, i, j)
 
 plt.show()
-'''
+

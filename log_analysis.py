@@ -2,8 +2,13 @@ import re
 import numpy as np
 
 # root = '../data/log/'
-# filenames = ["80c5815_0_123.log", "fe977d4_0_123.log", "6a33607_0_123.log", "e19744f_0_123.log"]
 root = '../data/log/'
+'''
+filenames1 = ["02923e5_0_123.log", "02923e5_1_123.log"]
+filenames2 = ["cd43447_0_123.log", "cd43447_1_123.log"]
+filenames3 = ["ff14c38_0_123.log", "ff14c38_1_123.log"]
+filenames4 = ["ff4e437_0_123.log", "ff4e437_1_123.log"]
+'''
 filenames = ["cd43447_0_123.log", "cd43447_1_123.log"]
 
 for filename in filenames:
